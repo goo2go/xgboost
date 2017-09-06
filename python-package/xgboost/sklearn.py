@@ -258,14 +258,13 @@ class XGBModel(XGBModelBase):
         """
         if sample_weight is not None:
             trainDmatrix = DMatrix(X, label=y, weight=sample_weight,
-                                   missing=self.missing, nthread=self.n_jobs)
+                                   missing=self.missing)
         else:
-            trainDmatrix = DMatrix(X, label=y, missing=self.missing, nthread=self.n_jobs)
+            trainDmatrix = DMatrix(X, label=y, missing=self.missing)
 
         evals_result = {}
         if eval_set is not None:
-            evals = list(DMatrix(x[0], label=x[1], missing=self.missing,
-                                 nthread=self.n_jobs) for x in eval_set)
+            evals = list(DMatrix(x[0], label=x[1], missing=self.missing) for x in eval_set)
             evals = list(zip(evals, ["validation_{}".format(i) for i in
                                      range(len(evals))]))
         else:
@@ -306,7 +305,7 @@ class XGBModel(XGBModelBase):
 
     def predict(self, data, output_margin=False, ntree_limit=0):
         # pylint: disable=missing-docstring,invalid-name
-        test_dmatrix = DMatrix(data, missing=self.missing, nthread=self.n_jobs)
+        test_dmatrix = DMatrix(data, missing=self.missing)
         return self.get_booster().predict(test_dmatrix,
                                           output_margin=output_margin,
                                           ntree_limit=ntree_limit)
@@ -329,7 +328,7 @@ class XGBModel(XGBModelBase):
             leaf x ends up in. Leaves are numbered within
             ``[0; 2**(self.max_depth+1))``, possibly with gaps in the numbering.
         """
-        test_dmatrix = DMatrix(X, missing=self.missing, nthread=self.n_jobs)
+        test_dmatrix = DMatrix(X, missing=self.missing)
         return self.get_booster().predict(test_dmatrix,
                                           pred_leaf=True,
                                           ntree_limit=ntree_limit)
@@ -478,7 +477,7 @@ class XGBClassifier(XGBModel, XGBClassifierBase):
             # TODO: use sample_weight if given?
             evals = list(
                 DMatrix(x[0], label=self._le.transform(x[1]),
-                        missing=self.missing, nthread=self.n_jobs)
+                        missing=self.missing)
                 for x in eval_set
             )
             nevals = len(evals)
@@ -491,10 +490,10 @@ class XGBClassifier(XGBModel, XGBClassifierBase):
 
         if sample_weight is not None:
             train_dmatrix = DMatrix(X, label=training_labels, weight=sample_weight,
-                                    missing=self.missing, nthread=self.n_jobs)
+                                    missing=self.missing)
         else:
             train_dmatrix = DMatrix(X, label=training_labels,
-                                    missing=self.missing, nthread=self.n_jobs)
+                                    missing=self.missing)
 
         self._Booster = train(xgb_options, train_dmatrix, self.n_estimators,
                               evals=evals,
@@ -517,7 +516,7 @@ class XGBClassifier(XGBModel, XGBClassifierBase):
         return self
 
     def predict(self, data, output_margin=False, ntree_limit=0):
-        test_dmatrix = DMatrix(data, missing=self.missing, nthread=self.n_jobs)
+        test_dmatrix = DMatrix(data, missing=self.missing)
         class_probs = self.get_booster().predict(test_dmatrix,
                                                  output_margin=output_margin,
                                                  ntree_limit=ntree_limit)
@@ -529,7 +528,7 @@ class XGBClassifier(XGBModel, XGBClassifierBase):
         return self._le.inverse_transform(column_indexes)
 
     def predict_proba(self, data, output_margin=False, ntree_limit=0):
-        test_dmatrix = DMatrix(data, missing=self.missing, nthread=self.n_jobs)
+        test_dmatrix = DMatrix(data, missing=self.missing)
         class_probs = self.get_booster().predict(test_dmatrix,
                                                  output_margin=output_margin,
                                                  ntree_limit=ntree_limit)
